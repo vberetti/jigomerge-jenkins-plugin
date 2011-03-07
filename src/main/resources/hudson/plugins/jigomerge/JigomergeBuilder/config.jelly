@@ -1,0 +1,17 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+    <f:entry title="source" help="${rootURL}/plugin/jigomerge/help-builder-source.html">
+        <f:textbox field="source" clazz="required" checkMessage="${%mandatory.source}"/>
+    </f:entry>
+    <f:entry title="username" help="${rootURL}/plugin/jigomerge/help-builder-username.html">
+        <f:textbox field="username" clazz="required" checkMessage="${%mandatory.username}"/>
+    </f:entry>
+    <f:entry title="password" help="${rootURL}/plugin/jigomerge/help-builder-password.html">
+        <f:password field="password" clazz="required" checkMessage="${%mandatory.password}"/>
+    </f:entry>
+    <f:entry title="oneByOne" help="${rootURL}/plugin/jigomerge/help-builder-oneByOne.html">
+        <f:checkbox field="oneByOne" />
+    </f:entry>
+    <f:entry title="eager" help="${rootURL}/plugin/jigomerge/help-builder-eager.html">
+        <f:checkbox field="eager" />
+    </f:entry>
+</j:jelly>
