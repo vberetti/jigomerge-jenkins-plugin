@@ -2,9 +2,11 @@ package hudson.plugins.jigomerge;
 
 import groovy.lang.GroovyClassLoader;
 import groovy.lang.GroovyObject;
+import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
+import hudson.model.Descriptor;
 import hudson.tasks.Builder;
 
 import java.io.File;
@@ -15,6 +17,9 @@ import java.util.Collections;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 public class JigomergeBuilder extends Builder {
+
+	@Extension
+	public static final JigomergeDescriptor DESCRIPTOR = new JigomergeDescriptor();
 
 	private final String source;
 	private final String username;
@@ -31,6 +36,11 @@ public class JigomergeBuilder extends Builder {
 	}
 
 	@Override
+	public Descriptor<Builder> getDescriptor() {
+		return DESCRIPTOR;
+	}
+
+	@Override
 	public boolean perform(final AbstractBuild<?, ?> build,
 			final Launcher launcher, final BuildListener listener)
 			throws InterruptedException, IOException {
@@ -41,11 +51,12 @@ public class JigomergeBuilder extends Builder {
 			GroovyClassLoader gcl = new GroovyClassLoader();
 			Class clazz = gcl.parseClass(new File(fileName));
 			Constructor[] cs = clazz.getConstructors();
-		    GroovyObject instance =(GroovyObject) cs[0].newInstance(true, Collections.EMPTY_LIST, false,
-					false, true, "toto", "toto");
+			GroovyObject instance = (GroovyObject) cs[0].newInstance(true,
+					Collections.EMPTY_LIST, false, false, true, "toto", "toto");
 
 			Object[] argsM = { "http://toto", null };
-			Object returnedObject = instance.invokeMethod("launchSvnMerge", argsM);
+			Object returnedObject = instance.invokeMethod("launchSvnMerge",
+					argsM);
 		} catch (Exception e) {
 
 		}

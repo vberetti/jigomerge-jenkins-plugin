@@ -9,6 +9,6 @@
         <f:password field="password" clazz="required" checkMessage="${%mandatory.password}"/>
     </f:entry>
     <f:entry title="eager" help="${rootURL}/plugin/jigomerge/help-builder-eager.html">
-        <f:checkbox field="eager" checked="${instance.executeFromWorkingDir}"
+        <f:checkbox field="eager" />
     </f:entry>
 </j:jelly>
