@@ -145,7 +145,7 @@ public class SvnMergeTool {
 
     if (!mergeOneByOne) {
       // reset workspace before real merge
-      resetWorkspace()
+      resetWorkspace(workingDirectory)
       if (!validRevisions.isEmpty()) {
 
         // merge all valid revisions
@@ -156,7 +156,7 @@ public class SvnMergeTool {
       }
     }
 
-    svnUpdate()
+    svnUpdate(workingDirectory)
     if (!result.status) {
       printOut.println 'MANUAL MERGE NEEDS TO BE DONE !'
     }
@@ -208,7 +208,7 @@ public class SvnMergeTool {
     status &= svnUpdate(workingDirectory)
 
     // delete unversionned files
-    listUnversionnedFiles().each() {file ->
+    listUnversionnedFiles(workingDirectory).each() {file ->
       if (file.isDirectory()) {
         file.deleteDir()
       } else {
@@ -222,8 +222,8 @@ public class SvnMergeTool {
   }
 
   protected def List<File> listUnversionnedFiles(String workingDirectory) {
-    def process = svnStatus('--xml ' + workingDirectory)
-    def statusXmlLog = process.in.text
+    def process = svnStatus('--xml ', workingDirectory)
+    def statusXmlLog = process.inText
     def files = []
 
     def statusParser = new XmlSlurper().parseText(statusXmlLog)
@@ -238,8 +238,8 @@ public class SvnMergeTool {
   }
 
   protected def hasWorkspaceConflicts(String workingDirectory) {
-    def process = svnStatus('--xml ' + workingDirectory)
-    def statusXmlLog = process.in.text
+    def process = svnStatus('--xml ', workingDirectory)
+    def statusXmlLog = process.inText
 
     def statusParser = new XmlSlurper().parseText(statusXmlLog)
     def conflicts = statusParser.target.entry.findAll() {it -> it."wc-status".@item.text() == 'conflicted' || it."wc-status".@props.text() == 'conflicted' || it."wc-status".@"tree-conflicted".text() == "true" }
@@ -273,7 +273,7 @@ public class SvnMergeTool {
 
   protected def String[] retrieveAvailableRevisionsMergeInfo(String mergeUrl, String workingDirectory) {
     def process = executeSvnCommand('mergeinfo --show-revs eligible ' + mergeUrl + ' ' + workingDirectory)
-    def log = process.in.text
+    def log = process.inText
 
     def revisions = []
     log.eachLine() {it ->
@@ -286,7 +286,7 @@ public class SvnMergeTool {
 
   protected def String retrieveCommentFromRevisionWithLog(String mergeUrl, String revision, String workingDirectory) {
     def process = executeSvnCommand('log --xml -r ' + revision + ' ' + mergeUrl + ' ' + workingDirectory)
-    def logXml = process.in.text
+    def logXml = process.inText
 
     def log = new XmlSlurper().parseText(logXml)
     def comment = log.logentry.msg.text()
@@ -377,54 +377,55 @@ public class SvnMergeTool {
   }
 
   protected def executeCommandWithStatus(String commandLabel) {
-    def process = executeCommand(commandLabel, false)
-    if (verbose) {
-      def output = process.in.text
-      if (output != null && output.trim() != '') {
-        def debugOuput = ''
-        output.trim().eachLine() {it ->
-          debugOuput += '[DEBUG] ' + it + '\n'
-        }
-        printOut.println '[DEBUG] BEGIN command output :'
-        printOut.print debugOuput
-        printOut.println '[DEBUG] END command output'
-      }
-      def errOutput = process.errorStream.text
-      if (errOutput != null && errOutput.trim() != '') {
-        def errDebugOuput = ''
-        errOutput.trim().eachLine() {it ->
-          errDebugOuput += '[DEBUG][ERROR] ' + it + '\n'
-        }
-        printOut.println '[DEBUG] BEGIN ERROR command output :'
-        printOut.print errDebugOuput
-        printOut.println '[DEBUG] END ERROR command output'
-      }
-    }
-    process.waitFor()
-    if (verbose) {
-      printOut.println '[DEBUG] exit value : ' + process.exitValue()
-    }
- 
-    return (process.exitValue() == 0)
-  }
-  
-  protected def executeCommand(String commandLabel){
-    executeCommand(commandLabel, true)
+    def process = executeCommand(commandLabel, true)
+    return (process.exitValue == 0)
   }
 
-  protected def executeCommand(String commandLabel, boolean wait) {
+  protected def executeCommand(String commandLabel){
+    return executeCommand(commandLabel, false)
+  }
+
+  protected def executeCommand(String commandLabel, boolean discardOutput) {
+    def processOutput = [:]
     if (verbose) {
-      printOut.println '[DEBUG] executing command \'' + commandLabel + '\''
+      def commandLabelToPrint = commandLabel
+      // dirty hack to delete password from verbose
+      if(commandLabel.contains('--password')){
+        def passwordMatcher = commandLabelToPrint =~ "(.* )(--password \\S* )(.*)"
+        commandLabelToPrint = passwordMatcher[0][1] + passwordMatcher[0][3]
+      }
+      printOut.println '[DEBUG] executing command \'' + commandLabelToPrint + '\''
     }
     def process = commandLabel.execute()
+
+    def outBuffer = new ByteArrayOutputStream()
+    def errBuffer = new ByteArrayOutputStream()
     
-    if(wait){
-      process.waitFor()
-      if (verbose) {
-        printOut.println '[DEBUG] exit value : ' + process.exitValue()
+    if(discardOutput){
+      if (verbose){
+        process.consumeProcessOutput(printOut, printOut)
+      } else {
+        // discard output, see http://groovy.codehaus.org/groovy-jdk/java/lang/Process.html#consumeProcessOutput()
+        process.consumeProcessOutput();
       }
+    }else{
+      process.consumeProcessOutput(outBuffer, errBuffer)
     }
-    return process
+
+    process.waitFor()
+
+    if (verbose) {
+      if(!discardOutput){
+         printOut.println outBuffer.toString()
+         printOut.println errBuffer.toString()
+      }
+      printOut.println '[DEBUG] exit value : ' + process.exitValue()
+    }
+    processOutput.exitValue = process.exitValue()
+    processOutput.inText = outBuffer.toString()
+    processOutput.inErrText = errBuffer.toString()
+    
+    return processOutput
   }
 
   public static void main(String[] args) {

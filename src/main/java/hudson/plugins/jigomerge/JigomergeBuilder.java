@@ -26,7 +26,7 @@ public class JigomergeBuilder extends Builder {
 	@Extension
 	public static final JigomergeBuildDescriptor DESCRIPTOR = new JigomergeBuildDescriptor();
 
-	private static final String JIGOMERGE_VERSION = "2.2.1";
+	private static final String JIGOMERGE_VERSION = "2.2.2";
 
 	private final String source;
 	private final String username;
