@@ -10,7 +10,7 @@
 	<artifactId>jigomerge</artifactId>
 	<packaging>hpi</packaging>
 	<version>0.1-SNAPSHOT</version>
-	<name>Jenkins Jigomerge plugin</name>
+	<name>Jigomerge plugin</name>
 	<url>http://wiki.jenkins-ci.org/display/HUDSON/Jigomerge+Plugin</url>
 
 	<developers>
