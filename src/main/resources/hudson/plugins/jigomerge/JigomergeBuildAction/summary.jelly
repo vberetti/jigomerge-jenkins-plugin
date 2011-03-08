@@ -2,6 +2,12 @@
          xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson"
          xmlns:f="/lib/form" xmlns:i="jelly:fmt">
     <t:summary icon="installer.gif">
-    blibli
+    	<j:if test="${it.mergeResult.status}">
+			Merge successfull !
+		</j:if>
+		<j:if test="${!it.mergeResult.status}">
+			<b>Merge failure !</b><br/>
+			Conflicts : ${it.mergeResult.conflictingRevisions.size()}
+		</j:if>
     </t:summary>
 </j:jelly>

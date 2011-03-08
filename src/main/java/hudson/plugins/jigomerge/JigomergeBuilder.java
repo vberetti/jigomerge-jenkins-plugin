@@ -4,8 +4,10 @@ import groovy.lang.GroovyClassLoader;
 import groovy.lang.GroovyObject;
 import hudson.Extension;
 import hudson.Launcher;
-import hudson.model.AbstractBuild;
+import hudson.XmlFile;
+import hudson.model.Action;
 import hudson.model.BuildListener;
+import hudson.model.AbstractBuild;
 import hudson.model.Descriptor;
 import hudson.tasks.Builder;
 
@@ -14,8 +16,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.util.Collections;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.List;
+import java.util.Map;
 
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -52,25 +54,39 @@ public class JigomergeBuilder extends Builder {
 	@Override
 	public boolean perform(final AbstractBuild<?, ?> build, final Launcher launcher, final BuildListener listener)
 	        throws InterruptedException, IOException {
-		boolean status = true;
-
 		listener.getLogger().println(source + "#" + username + "#" + password + "#" + oneByOne + "#" + eager);
-
+		String workingDirectory = build.getModuleRoot().toURI().getPath();
+		
+		MergeResult result = new MergeResult();
+		result.setStatus(false);
+		
 		try {
 			InputStream scriptResource = this.getClass().getResourceAsStream("/scripts/jigomerge.groovy");
 			GroovyClassLoader gcl = new GroovyClassLoader();
 			Class<?> clazz = gcl.parseClass(scriptResource);
 			Constructor<?>[] constructors = clazz.getConstructors();
 			GroovyObject instance = (GroovyObject) constructors[0].newInstance(dryRun, Collections.EMPTY_LIST, oneByOne, eager,
-			        verbose, username, password);
+			        verbose, username, password, listener.getLogger());
 
-			Object[] mergeArgs = { source, validationScript };
-			Object returnedObject = instance.invokeMethod("launchSvnMerge", mergeArgs);
+			Object[] mergeArgs = { source, validationScript, workingDirectory };
+			Map returnedObject = (Map) instance.invokeMethod("launchSvnMerge", mergeArgs);
 			listener.getLogger().println("return : " + returnedObject);
+
+			// fill merge result
+			result.setStatus((Boolean) returnedObject.get("status"));
+			List<String> conflictingRevisions = (List<String>) returnedObject.get("conflictingRevisions");
+			if (conflictingRevisions != null) {
+				result.getConflictingRevisions().addAll(conflictingRevisions);
+			}
+			
 		} catch (Exception e) {
 			listener.getLogger().println(e.getClass() + " # " + e.getMessage());
 		}
-		return status;
+		
+		Action action = new JigomergeBuildAction(build, result, listener);
+		build.addAction(action);
+		
+		return result.isStatus();
 	}
 
 	public String getSource() {

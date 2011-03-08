@@ -3,7 +3,31 @@
     <l:layout>
         <st:include it="${it.owner}" page="sidepanel.jelly" />
         <l:main-panel>
-            <h1>Jigomerge Conflict Report</h1>          
+        	<j:if test="${it.mergeResult.status}">
+        	<b>No conflict !</b>
+        	</j:if>
+        	<j:if test="${!it.mergeResult.status}">
+            <h1>Jigomerge Conflicting Revisions</h1>         
+            <table>
+            	<tr>
+            		<th>Revision</th>
+            		<th>Log</th>
+            		<th>Conflicting files</th>
+            		<th>Diff</th>
+            		<th>Action</th>
+            	</tr>
+            	<j:forEach var="revision" items="${it.mergeResult.conflictingRevisions}">
+            	<tr>
+            		<td>${revision}</td>
+            		<td>${it.mergeResult.conflictingLogs.get(revision)}</td>
+            		<td>${it.mergeResult.conflictingFiles.get(revision)}</td>
+            		<td>${it.mergeResult.conflictingDiffs.get(revision)}</td>
+            		<td>${revision}</td>
+            		<td>TODO</td>
+            	</tr>
+            	</j:forEach>
+            </table>
+        	</j:if>
         </l:main-panel>
     </l:layout>
 </j:jelly>
