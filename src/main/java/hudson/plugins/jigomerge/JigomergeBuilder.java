@@ -26,6 +26,8 @@ public class JigomergeBuilder extends Builder {
 	@Extension
 	public static final JigomergeBuildDescriptor DESCRIPTOR = new JigomergeBuildDescriptor();
 
+	private static final String JIGOMERGE_VERSION = "2.2.1";
+
 	private final String source;
 	private final String username;
 	private final String password;
@@ -54,14 +56,14 @@ public class JigomergeBuilder extends Builder {
 	@Override
 	public boolean perform(final AbstractBuild<?, ?> build, final Launcher launcher, final BuildListener listener)
 	        throws InterruptedException, IOException {
-		listener.getLogger().println(source + "#" + username + "#" + password + "#" + oneByOne + "#" + eager);
 		String workingDirectory = build.getModuleRoot().toURI().getPath();
-		
+
 		MergeResult result = new MergeResult();
 		result.setStatus(false);
-		
+
 		try {
-			InputStream scriptResource = this.getClass().getResourceAsStream("/scripts/jigomerge.groovy");
+			InputStream scriptResource = this.getClass().getResourceAsStream(
+			        "/scripts/jigomerge-" + JIGOMERGE_VERSION + ".groovy");
 			GroovyClassLoader gcl = new GroovyClassLoader();
 			Class<?> clazz = gcl.parseClass(scriptResource);
 			Constructor<?>[] constructors = clazz.getConstructors();
@@ -78,14 +80,14 @@ public class JigomergeBuilder extends Builder {
 			if (conflictingRevisions != null) {
 				result.getConflictingRevisions().addAll(conflictingRevisions);
 			}
-			
+
 		} catch (Exception e) {
 			listener.getLogger().println(e.getClass() + " # " + e.getMessage());
 		}
-		
+
 		Action action = new JigomergeBuildAction(build, result, listener);
 		build.addAction(action);
-		
+
 		return result.isStatus();
 	}
 

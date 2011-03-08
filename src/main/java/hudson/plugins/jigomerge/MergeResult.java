@@ -8,7 +8,7 @@ public class MergeResult {
 
 	private boolean status;
 	private List<String> conflictingRevisions;
-	private Map<String,String> conflictingLogs;
+	private Map<String, String> conflictingLogs;
 	private Map<String, List<String>> conflictingFiles;
 	private Map<String, List<String>> conflictingDiffs;
 
@@ -29,14 +29,14 @@ public class MergeResult {
 	}
 
 	public Map<String, String> getConflictingLogs() {
-    	return conflictingLogs;
-    }
+		return conflictingLogs;
+	}
 
 	public Map<String, List<String>> getConflictingFiles() {
-    	return conflictingFiles;
-    }
+		return conflictingFiles;
+	}
 
 	public Map<String, List<String>> getConflictingDiffs() {
-    	return conflictingDiffs;
-    }
+		return conflictingDiffs;
+	}
 }
