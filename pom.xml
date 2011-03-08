@@ -1,17 +1,17 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	 <parent>
-        <groupId>org.jenkins-ci.plugins</groupId>
-        <artifactId>plugin</artifactId>
-        <version>1.399</version>
-    </parent>
+	<parent>
+		<groupId>org.jenkins-ci.plugins</groupId>
+		<artifactId>plugin</artifactId>
+		<version>1.399</version>
+	</parent>
 
 	<artifactId>jigomerge</artifactId>
 	<packaging>hpi</packaging>
 	<version>0.1-SNAPSHOT</version>
-	<name>Hudson Jigomerge plugin</name>
-	<url>http://wiki.hudson-ci.org/display/HUDSON/Jigomerge+Plugin</url>
+	<name>Jenkins Jigomerge plugin</name>
+	<url>http://wiki.jenkins-ci.org/display/HUDSON/Jigomerge+Plugin</url>
 
 	<developers>
 		<developer>
@@ -27,18 +27,18 @@
 			<version>1.2</version>
 		</dependency>
 	</dependencies>
-	
+
 	<repositories>
-	<repository>
-        <id>jenkins</id>
-        <url>http://maven.jenkins-ci.org:8081/content/repositories/releases/</url>
-        <releases>
-           <enabled>true</enabled>
-        </releases>
-        <snapshots>
-          <enabled>false</enabled>
-        </snapshots>        
-     </repository>
+		<repository>
+			<id>jenkins</id>
+			<url>http://maven.jenkins-ci.org:8081/content/repositories/releases/</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
 	</repositories>
 
 </project>
